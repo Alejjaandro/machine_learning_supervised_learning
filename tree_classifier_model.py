@@ -9,82 +9,81 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
 from sklearn import tree
 
-# Cargamos el dataset
+# Import data
 ruta_csv = Path(__file__).resolve().parents[0] / "DataSet_Titanic.csv"
 
 df = pd.read_csv(ruta_csv)
 
-# Guardamos los atributos predictores (todas las etiquetas excepto "Sobreviviente")
-datos_predictores = df.drop("Sobreviviente", axis=1)
+# Save the column "Sobreviviente" as  "predictors"
+predictors = df.drop("Sobreviviente", axis=1)
 
-# Y la etiqueta a predecir ("Sobreviviente")
-dato_a_predecir = df["Sobreviviente"]
+# Save the column "Sobreviviente" as  "data_to_predict"
+data_to_predict = df["Sobreviviente"]
 
-# Creamos un modelo de decision: cuanto mas profundo sea, mas precision obtendrá
-modelo = DecisionTreeClassifier(random_state=42)
-parametros = {"max_depth": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, None]}
+# Create base model
+base_model = DecisionTreeClassifier(max_depth=2, random_state=42)
 
-# Implementamos GridSearchCV
-grid_search = GridSearchCV(estimator=modelo, param_grid=parametros, cv=5, scoring='accuracy')
+# Create model for GridSearchCV. As more "max_depth" the more accurate the model will be.
+model = DecisionTreeClassifier(random_state=42)
+parameters = {"max_depth": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, None]}
 
-# Ajustamos GridSearchCV con los datos
-grid_search.fit(datos_predictores, dato_a_predecir)
+# Implement GridSearchCV
+grid_search = GridSearchCV(estimator=model, param_grid=parameters, cv=5, scoring='accuracy')
 
-print(f"Mejores parámetros: {grid_search.best_params_}")
-print(f"Mejor precisión: {grid_search.best_score_:.4f}")
+# Adjust GridSearchCV with our data
+grid_search.fit(predictors, data_to_predict)
 
-# Obtenemos el mejor modelo que obtuvo GridSearchCV.
-# Este es por defecto un DecisionTreeClassifier con los mejores parámetros encontrados.
-mejor_modelo = grid_search.best_estimator_
+print(f"Better parameters: {grid_search.best_params_}")
+print(f"Best score: {grid_search.best_score_:.4f}")
 
-# Creamos un modelo de decision con nuestros parámetros
-arbol = DecisionTreeClassifier(max_depth=2, random_state=42)
+# We extract the best model from GridSearchCV
+best_model = grid_search.best_estimator_
 
-# Entrenamos a la máquina
-arbol.fit(datos_predictores, dato_a_predecir)
-mejor_modelo.fit(datos_predictores, dato_a_predecir)
+# Train our models
+base_model.fit(predictors, data_to_predict)
+best_model.fit(predictors, data_to_predict)
 
-# Predecimos sobre nuestro set
-prediccion_arbol = arbol.predict(datos_predictores)
-prediccion_modelo = mejor_modelo.predict(datos_predictores)
+# Make predictions over our data
+prediction_base_model = base_model.predict(predictors)
+prediction_best_model = best_model.predict(predictors)
 
-# Comaparamos con las etiquetas reales
-print(f"Exactitud del arbol: {round(accuracy_score(dato_a_predecir, prediccion_arbol)*100, 2)}%")
-print(f"Exactitud del modelo: {round(accuracy_score(dato_a_predecir, prediccion_modelo)*100, 2)}%")
+# Compare accuracy of our models
+print(f"Accuracy of the base model: {round(accuracy_score(data_to_predict, prediction_base_model)*100, 2)}%")
+print(f"Accuracy of the GridSearch model: {round(accuracy_score(data_to_predict, prediction_best_model)*100, 2)}%")
 
-modelo_elegido = ""
-modelo_para_graficar = ""
-if accuracy_score(dato_a_predecir, prediccion_arbol) > accuracy_score(dato_a_predecir, prediccion_modelo):
-    print("El arbol es mejor")
-    modelo_elegido = prediccion_arbol
-    modelo_para_graficar = arbol
+choosen_model = ""
+model_for_graphics = ""
+if accuracy_score(data_to_predict, prediction_base_model) > accuracy_score(data_to_predict, prediction_best_model):
+    print("The base model is better")
+    choosen_model = prediction_base_model
+    model_for_graphics = base_model
 else:
-    print("El modelo es mejor")
-    modelo_elegido = prediccion_modelo
-    modelo_para_graficar = mejor_modelo
+    print("The GridSearch model is better")
+    choosen_model = prediction_best_model
+    model_for_graphics = best_model
     
-# Creamos una matriz de confusión con el modelo elejido
-confusion_matrix(dato_a_predecir, modelo_elegido)
+# Create confusion matrix 
+confusion_matrix(data_to_predict, choosen_model)
 
-# Creamos un gráfico para la matriz de confusión
-ConfusionMatrixDisplay.from_estimator(modelo_para_graficar, datos_predictores, dato_a_predecir, cmap=plt.cm.Blues, values_format='.2f')
+# Graphic the confusion matrix
+ConfusionMatrixDisplay.from_estimator(model_for_graphics, predictors, data_to_predict, cmap=plt.cm.Blues, values_format='.2f')
 plt.show()
 
-# Creamos un gráfico para la matriz de confusión normalizada
-ConfusionMatrixDisplay.from_estimator(modelo_para_graficar, datos_predictores, dato_a_predecir, cmap=plt.cm.Blues, values_format='.2f', normalize="true")
+# Graphic the confusion matrix (normalized)
+ConfusionMatrixDisplay.from_estimator(model_for_graphics, predictors, data_to_predict, cmap=plt.cm.Blues, values_format='.2f', normalize="true")
 plt.show()
 
-# Mostramos un árbol gráficamente
+# Graphic the tree
 plt.figure(figsize=(10, 10))
-tree.plot_tree(modelo_para_graficar, filled=True, feature_names=datos_predictores.columns)
+tree.plot_tree(model_for_graphics, filled=True, feature_names=predictors.columns)
 plt.show()
 
-# Hacemos un grafico con la importancia de las variables
-# Creamos las variables x (importancias) e y (columnas)
-importancias = modelo_para_graficar.feature_importances_
-columnas = datos_predictores.columns
+# Graphic the importances of the variables
+# Create variables x (importance) e y (columns)
+importance = model_for_graphics.feature_importances_
+columns = predictors.columns
 
-# Creamos el gráfico
-sns.barplot(x=columnas, y=importancias)
-plt.title("Importancia de las variables")
+# Create graphic
+sns.barplot(x=columns, y=importance)
+plt.title("Importance of the variables")
 plt.show()
