@@ -1,4 +1,3 @@
-from pathlib import Path
 import pandas as pd
 
 from sklearn.linear_model import LogisticRegression
@@ -7,12 +6,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
 # Import data
-csv_path = Path(__file__).resolve().parents[0] / "DataSet_Titanic.csv"
-df = pd.read_csv(csv_path)
+df = pd.read_csv("DataSet_Titanic.csv")
 
 # Split data: x = predictors, y = data_to_predict 
-x = df.drop("Sobreviviente", axis=1)
-y = df["Sobreviviente"]
+x = df.drop("Survived", axis=1)
+y = df["Survived"]
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
 

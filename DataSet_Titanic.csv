@@ -1,4 +1,4 @@
-Sobreviviente,Clase,Genero,Edad,HermEsp,PadHij
+Survived,Class,Sex,Age,SibSp,ParCh
 0,3,0,22.0,1,0
 1,1,1,38.0,1,0
 1,3,1,26.0,0,0
