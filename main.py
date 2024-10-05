@@ -34,7 +34,10 @@ def titanic_predictor():
             
             print("="*50)
             print(f"YOUR PASSENGER: Class: {passenger_class}, Gender: {sex}, Age: {age}, SibSp: {sibsp}, ParCh: {parch}\n")
-            print (tree_predictor(passenger))
+            output = tree_predictor(passenger)
+            print (output["result"])
+            print("\nFeature importance:")
+            print(output["importance"])
             print("="*50)
             
             print("\nPress any key to continue...")

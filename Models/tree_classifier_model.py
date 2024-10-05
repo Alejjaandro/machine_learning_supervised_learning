@@ -56,20 +56,27 @@ def tree_predictor(passenger):
     else:
         # print("The GridSearch model is better")
         choosen_model = grid_model
-        
+    
+    importance_df = pd.DataFrame({
+    'Variable': predictors.columns,
+    'Importance': (base_model.feature_importances_ * 100).round(2)
+    })
+
     # Fictional passenger prediction (Class, Genrer, Age, SiblingsSpouses, FatherSons)
     prediccion_ficticial = choosen_model.predict(passenger)
     if prediccion_ficticial == 1:
-        return "Your passenger will survive!"
+        return {
+            "result":"Your passenger will survive!",
+            "importance": importance_df
+            }
     else:
-        return "Your passenger will not survive."
+        return {
+            "result":"Your passenger will not survive!",
+            "importance": importance_df
+            }
 
 
 # # Graphic the importances of the variables
-# importance_df = pd.DataFrame({
-#     'Variable': predictors.columns,
-#     'Importance': base_model.feature_importances_
-# })
 
 # importance_df = importance_df.sort_values(by='Importance', ascending=False)
 
