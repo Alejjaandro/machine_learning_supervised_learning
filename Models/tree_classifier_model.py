@@ -22,7 +22,7 @@ def tree_predictor(passenger):
     Y = df["Survived"]
 
     # Divide data into validation and training data
-    X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size=0.2, random_state=42)
+    X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size=0.2, random_state=89)
     
     # Create base model
     base_model = DecisionTreeClassifier(random_state=42)
@@ -88,12 +88,12 @@ def tree_predictor(passenger):
     return result
 
 # Test the model with a fictional passenger
-# passenger = pd.DataFrame({
-#     "Class": [2],
-#     "Sex": [1],
-#     "Age": [24],
-#     "SibSp": [0],
-#     "ParCh": [0]
-# })
+passenger = pd.DataFrame({
+    "Class": [2],
+    "Sex": [1],
+    "Age": [24],
+    "SibSp": [0],
+    "ParCh": [0]
+})
 
-# output = tree_predictor(passenger)
+output = tree_predictor(passenger)
