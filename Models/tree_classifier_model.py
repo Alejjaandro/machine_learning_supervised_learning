@@ -42,10 +42,6 @@ def tree_predictor(passenger):
     print("\nTraining GridSearchCV...")
     grid_search.fit(X_train, Y_train)
     grid_model = grid_search.best_estimator_
-
-    # Train our model
-    print("Training model...\n")
-    grid_model.fit(X_train, Y_train)
     
     # Make predictions over our data
     prediction_grid_model = grid_model.predict(X_valid)
@@ -54,7 +50,6 @@ def tree_predictor(passenger):
     print(f"Accuracy of the GridSearch model: {round(accuracy_score(Y_valid, prediction_grid_model)*100, 2)}%\n")
                     
     # Fictional passenger prediction (Class, Genrer, Age, SiblingsSpouses, FatherSons)
-    prediccion_ficticial = grid_model.predict(passenger)
     surviving_prob = round(grid_model.predict_proba(passenger)[0][1] * 100, 2)
     
     # SHAP values for each variable of the passenger
@@ -62,22 +57,25 @@ def tree_predictor(passenger):
     
     shap_values = explainer(passenger)
     
+    # Exxtract the SHAP values of each variable
     shap_single_value = shap_values[0][:, 1]
+    
+    # Calculate the increase in survival probability for each variable
     increase_survival = np.round(shap_single_value.values * 100, 2)
     base_survival = round(shap_single_value.base_values * 100, 2)
     
     total_survival_inceased = round(increase_survival.sum(), 2)
     
     description = textwrap.dedent(f'''
-    Your had a base survival probability of {base_survival.round(2)}%.
+    Your have a base survival probability of {base_survival.round(2)}%.
     
     Each variable increases or decreases the survival probability of the passenger:
-    - "Class" increases the survival probability by {increase_survival[0]}%.
-    - "Sex" increases the survival probability by {increase_survival[1]}%.
-    - "Age" increases the survival probability by {increase_survival[2]}%.
-    - "SibSp" increases the survival probability by {increase_survival[3]}%.
-    - "ParCh" increases the survival probability by {increase_survival[4]}%.
-    For a total increase of {total_survival_inceased}%.
+    - "Class" changes the survival probability by {increase_survival[0]}%.
+    - "Sex" changes the survival probability by {increase_survival[1]}%.
+    - "Age" changes the survival probability by {increase_survival[2]}%.
+    - "SibSp" changes the survival probability by {increase_survival[3]}%.
+    - "ParCh" changes the survival probability by {increase_survival[4]}%.
+    For a total change of {total_survival_inceased}%.
     
     Finally, the survival probability of the passenger is {round(base_survival + total_survival_inceased, 2)}%.
     ''')
@@ -90,13 +88,12 @@ def tree_predictor(passenger):
     return result
 
 # Test the model with a fictional passenger
-passenger = pd.DataFrame({
-    "Class": [2],
-    "Sex": [1],
-    "Age": [24],
-    "SibSp": [0],
-    "ParCh": [0]
-})
+# passenger = pd.DataFrame({
+#     "Class": [2],
+#     "Sex": [1],
+#     "Age": [24],
+#     "SibSp": [0],
+#     "ParCh": [0]
+# })
 
 # output = tree_predictor(passenger)
-# print(output["result"])

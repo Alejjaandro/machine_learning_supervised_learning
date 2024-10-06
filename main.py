@@ -1,23 +1,26 @@
 import os
 import pandas as pd
 from Models.tree_classifier_model import tree_predictor
+from Models.gradient_boosting_model import gradient_boosting_predictor
 
 os.system('cls')
 
 def print_answer(passenger_class, sex, age, sibsp, parch, output):
     
-    print("="*50)
+    print("="*100)
     print(f"YOUR PASSENGER: Class: {passenger_class}, Sex: {sex}, Age: {age}, SibSp: {sibsp}, ParCh: {parch}")
     
     print(output["result"])
+    print("="*100)
     
     print("Do you want to know more about the prediction?")
     print("1. Yes\n2. No")
     
     if int(input()) == 1:
+        print("="*100)   
         print(output["description"])
+        print("="*100)
             
-    print("="*50)
     
 
 
@@ -50,7 +53,7 @@ def titanic_predictor():
                 "ParCh": [parch]
             })
             
-            output = tree_predictor(passenger)
+            output = gradient_boosting_predictor(passenger)
             print_answer(passenger_class, sex, age, sibsp, parch, output)
                             
             print("*"*100)
