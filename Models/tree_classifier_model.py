@@ -1,17 +1,13 @@
-import os
 import textwrap
 
 from pathlib import Path
 import pandas as pd
 import numpy as np
 import shap
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import GridSearchCV, train_test_split
-from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
-from sklearn import tree
+from sklearn.metrics import accuracy_score, classification_report
 
 def tree_predictor(passenger):
     # Import data
@@ -25,7 +21,7 @@ def tree_predictor(passenger):
     X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size=0.2, random_state=89)
     
     # Create base model
-    base_model = DecisionTreeClassifier(random_state=42)
+    base_model = DecisionTreeClassifier(random_state=89)
 
     # Define parameters for GridSearchCV 
     parameters = {
@@ -48,6 +44,9 @@ def tree_predictor(passenger):
 
     # Calculate the accuracy of the model
     print(f"Accuracy of the GridSearch model: {round(accuracy_score(Y_valid, prediction_grid_model)*100, 2)}%\n")
+    # print("Classification report:")
+    # print(classification_report(Y_valid, prediction_grid_model))
+
                     
     # Fictional passenger prediction (Class, Genrer, Age, SiblingsSpouses, FatherSons)
     surviving_prob = round(grid_model.predict_proba(passenger)[0][1] * 100, 2)
@@ -64,7 +63,7 @@ def tree_predictor(passenger):
     increase_survival = np.round(shap_single_value.values * 100, 2)
     base_survival = round(shap_single_value.base_values * 100, 2)
     
-    total_survival_inceased = round(increase_survival.sum(), 2)
+    total_survival_increased = round(increase_survival.sum(), 2)
     
     description = textwrap.dedent(f'''
     Your have a base survival probability of {base_survival.round(2)}%.
@@ -75,13 +74,13 @@ def tree_predictor(passenger):
     - "Age" changes the survival probability by {increase_survival[2]}%.
     - "SibSp" changes the survival probability by {increase_survival[3]}%.
     - "ParCh" changes the survival probability by {increase_survival[4]}%.
-    For a total change of {total_survival_inceased}%.
+    For a total change of {total_survival_increased}%.
     
-    Finally, the survival probability of the passenger is {round(base_survival + total_survival_inceased, 2)}%.
+    Finally, the survival probability of the passenger is {round(base_survival + total_survival_increased, 2)}%.
     ''')
     
     result = {
-        "result": f"\nYour passenger has a {surviving_prob}% probability of surviving!\n",
+        "result": f"\nYour passenger has a {surviving_prob}% probability of surviving!",
         "description": description
     }
     
@@ -89,11 +88,13 @@ def tree_predictor(passenger):
 
 # Test the model with a fictional passenger
 passenger = pd.DataFrame({
-    "Class": [2],
+    "Class": [3],
     "Sex": [1],
-    "Age": [24],
+    "Age": [26],
     "SibSp": [0],
     "ParCh": [0]
 })
 
-output = tree_predictor(passenger)
+# output = tree_predictor(passenger)
+# print(output["result"])
+# print(output["description"])

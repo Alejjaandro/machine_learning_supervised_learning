@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from Models.tree_classifier_model import tree_predictor
+from Models.random_forest_model import random_forest_predictor
 from Models.gradient_boosting_model import gradient_boosting_predictor
 
 os.system('cls')
@@ -53,7 +54,7 @@ def titanic_predictor():
                 "ParCh": [parch]
             })
             
-            output = gradient_boosting_predictor(passenger)
+            output = random_forest_predictor(passenger)
             print_answer(passenger_class, sex, age, sibsp, parch, output)
                             
             print("*"*100)

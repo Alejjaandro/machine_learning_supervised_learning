@@ -2,86 +2,97 @@
 from pathlib import Path
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+import shap
+import math
+import textwrap
 
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 
-df = pd.read_csv("DataSet_Titanic.csv")
+def random_forest_predictor(passenger):
+    df = pd.read_csv(Path(__file__).parent / "DataSet_Titanic.csv")
 
-# Save the column "Sobreviviente" as  "predictors"
-X = df.drop("Survived", axis=1)
+    # Divide data into X and Y. X is the data we will use to predict Y
+    X = df.drop("Survived", axis=1)
+    Y = df["Survived"]
 
-# Save the column "Sobreviviente" as  "data_to_predict"
-Y = df["Survived"]
+    # Divide data into validation and training data
+    X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size=0.2, random_state=89)
 
-# Split data: x = predictors, y = data_to_predict
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+    # Initialize the model
+    random_forest_model = RandomForestClassifier(random_state=89)
 
-# Initialize the model
-random_forest_model = RandomForestClassifier()
+    # Define the hyperparameters to tune
+    params = {
+        "max_depth": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, None],
+        "n_estimators": [50, 100, 150],
+        "min_samples_split": [2, 5, 10],
+        "min_samples_leaf": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    }
 
-# Define the hyperparameters to tune
-params = {
-    "n_estimators": [100, 200, 300],
-    "max_depth": [10, 20, 30, 40, 50],
-    "min_samples_split": [2, 5, 10],
-    "min_samples_leaf": [1, 2, 4],
-    "bootstrap": [True, False],
-}
+    # Create the GridSearchCV object
+    grid_search = GridSearchCV(estimator=random_forest_model, param_grid=params, cv=5, scoring="accuracy", n_jobs=-1)
 
-# Create the GridSearchCV object
-grid_search = GridSearchCV(estimator=random_forest_model, 
-                           param_grid=params, 
-                           cv=5,
-                           scoring="accuracy",
-                           n_jobs=-1)
+    # Training the model
+    print("\nTraining GridSearchCV...")
+    grid_search.fit(X_train, Y_train)
 
-# Training the model
-print("Training the model...")
-grid_search.fit(X_train, Y_train)
+    # Get the best model
+    grid_model = grid_search.best_estimator_
 
-# Print the best hyperparameters
-print("Best hyperparameters:", grid_search.best_params_)
+    # Making predictions
+    prediction_grid_model = grid_model.predict(X_valid)
 
-# Get the best model
-best_model = grid_search.best_estimator_
-
-# Making predictions
-Y_pred = best_model.predict(X_test)
-
-# Evaluating the model
-accuracy = accuracy_score(Y_test, Y_pred)
-print(f"Accuracy of the model: {accuracy * 100:.2f}%")
-print("Classification report:")
-print(classification_report(Y_test, Y_pred))
+    # Evaluating the model
+    print(f"Accuracy of the GridSearch model: {round(accuracy_score(Y_valid, prediction_grid_model)*100, 2)}%\n")
+    # print("Classification report:")
+    # print(classification_report(Y_valid, prediction_grid_model))
+    
+    # Fictional passenger prediction (Class, Genrer, Age, SiblingsSpouses, FatherSons)
+    surviving_prob = round(grid_model.predict_proba(passenger)[0][1] * 100, 2)
+    
+    # SHAP values for each variable of the passenger
+    explainer = shap.Explainer(grid_model, X_train)    
+    shap_values = explainer(passenger)
+    
+    shap_single_value = shap_values[0][:, 1]
+    
+    # Calculate the increase in survival probability for each variable
+    increase_survival = np.round(shap_single_value.values * 100, 2)
+    base_survival = round(shap_single_value.base_values * 100, 2)
+    total_survival_increased = round(increase_survival.sum(), 2)    
+    
+    description = textwrap.dedent(f'''
+    Your have a base survival probability of {base_survival.round(2)}%.
+    
+    Each variable increases or decreases the survival probability of the passenger:
+    - "Class" changes the survival probability by {increase_survival[0]}%.
+    - "Sex" changes the survival probability by {increase_survival[1]}%.
+    - "Age" changes the survival probability by {increase_survival[2]}%.
+    - "SibSp" changes the survival probability by {increase_survival[3]}%.
+    - "ParCh" changes the survival probability by {increase_survival[4]}%.
+    For a total change of {total_survival_increased}%.
+    
+    Finally, the survival probability of the passenger is {round(base_survival + total_survival_increased, 2)}%.
+    ''')
+    
+    result = {
+        "result": f"\nYour passenger has a {surviving_prob}% probability of surviving!",
+        "description": description
+    }
+        
+    return result
 
 # Prediction of a fictional passenger
-# Class, Sex, Age, SiblingsSpouses, FatherSons
 fictional_passenger = pd.DataFrame({
-    "Class": [3],
-    "Sex": [1],
-    "Age": [80],
+    "Class": [2],
+    "Sex": [0],
+    "Age": [26],
     "SibSp": [0],
     "ParCh": [0]
 })
-print("Fictional passenger:")
-print(fictional_passenger)
 
-# Fictional passenger prediction (Class, Genrer, Age, SiblingsSpouses, FatherSons)
-prediccion_ficticial = best_model.predict(fictional_passenger)
-
-if prediccion_ficticial == 1:
-    print("Fictional passenger survived.")
-else:
-    print("Fictional passenger did not survive.")
-
-# Graphic the importances of the variables
-# Create variables x (importance) e y (columns)
-importance = best_model.feature_importances_
-columns = X.columns
-sns.barplot(x=importance, y=columns)
-plt.title("Importance of the variables")
-plt.show()
+# output = random_forest_predictor(fictional_passenger)
+# print(output["result"])
+# print(output["description"])
