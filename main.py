@@ -1,5 +1,8 @@
 import os
 import pandas as pd
+import tkinter as tk
+from tkinter import messagebox
+
 from Models.tree_classifier_model import tree_predictor
 from Models.random_forest_model import random_forest_predictor
 from Models.gradient_boosting_model import gradient_boosting_predictor
@@ -66,5 +69,58 @@ def titanic_predictor():
             end = True
             return
         
+def predict_survival():
+    try:
+        # Obtener los datos ingresados por el usuario
+        pclass = int(class_var.get())
+        sex = int(sex_var.get())
+        age = int(age_var.get())
+        sibsp = int(sibsp_var.get())
+        parch = int(parch_var.get())
+        
+        # Crear un DataFrame para el pasajero
+        passenger = pd.DataFrame({
+            "Class": [pclass],
+            "Sex": [sex],
+            "Age": [age],
+            "SibSp": [sibsp],
+            "ParCh": [parch]
+        })
+        
+        # Realizar la predicción
+        output = random_forest_predictor(passenger)
+        messagebox.showinfo("\nPredicción", f"Resultado: {output['result']}\n\nDescripción: {output['description']}")
+         
+    except Exception as e:
+        messagebox.showerror("Error", f"Ha ocurrido un error: {e}")
 
-titanic_predictor()
+# Crear la ventana principal de la interfaz
+window = tk.Tk()
+window.title("Predicción de Supervivencia del Titanic")
+
+# Etiquetas y campos de entrada
+tk.Label(window, text="Clase (1, 2, 3)").grid(row=0, column=0)
+class_var = tk.StringVar()
+tk.Entry(window, textvariable=class_var).grid(row=0, column=1)
+
+tk.Label(window, text="Sexo (0=M, 1=F)").grid(row=1, column=0)
+sex_var = tk.StringVar()
+tk.Entry(window, textvariable=sex_var).grid(row=1, column=1)
+
+tk.Label(window, text="Edad").grid(row=2, column=0)
+age_var = tk.StringVar()
+tk.Entry(window, textvariable=age_var).grid(row=2, column=1)
+
+tk.Label(window, text="SibSp (Hermanos/Esposos)").grid(row=3, column=0)
+sibsp_var = tk.StringVar()
+tk.Entry(window, textvariable=sibsp_var).grid(row=3, column=1)
+
+tk.Label(window, text="Parch (Padres/Hijos)").grid(row=4, column=0)
+parch_var = tk.StringVar()
+tk.Entry(window, textvariable=parch_var).grid(row=4, column=1)
+
+# Botón para predecir
+tk.Button(window, text="Predecir", command=predict_survival).grid(row=5, column=1)
+
+# Iniciar la ventana
+window.mainloop()
