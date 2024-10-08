@@ -62,6 +62,19 @@ python main.py
 
 * Parch: Enter the number of parents or children aboard the Titanic.
 
+### Change model
+For now the only way of changing from one model to another is going to the line 92 inside `main.py`
+```
+output = random_forest_predictor(passenger, window)
+```
+
+And change `random_forest_predictor` for the model you want to use:
+```
+from Models.tree_classifier_model import tree_predictor
+from Models.random_forest_model import random_forest_predictor
+from Models.gradient_boosting_model import gradient_boosting_predictor
+```
+
 ### Prediction:
 
 Click on the "Predict" button to see the predicted survival probability of the passenger.  
@@ -100,6 +113,8 @@ The console area at the bottom of the GUI displays messages about the progress o
 ## Future Improvements
 
 - Add Additional Models: Integrate other machine learning models like Logistic Regression for comparison.
+
+- Update the GUI so the user can select the model form there instead of changing the code.
 
 - Data Visualization: Provide visual feedback of feature importance using matplotlib or SHAP visual plots.
 
