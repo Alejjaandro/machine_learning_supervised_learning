@@ -5,12 +5,13 @@ import numpy as np
 import shap
 import math
 import textwrap
+import time
 
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 
-def random_forest_predictor(passenger):
+def random_forest_predictor(passenger, window):
     df = pd.read_csv(Path(__file__).parent / "DataSet_Titanic.csv")
 
     # Divide data into X and Y. X is the data we will use to predict Y
@@ -36,6 +37,8 @@ def random_forest_predictor(passenger):
 
     # Training the model
     print("\nTraining GridSearchCV...")
+    window.update_idletasks()
+    
     grid_search.fit(X_train, Y_train)
 
     # Get the best model
@@ -46,10 +49,14 @@ def random_forest_predictor(passenger):
 
     # Evaluating the model
     print(f"Accuracy of the GridSearch model: {round(accuracy_score(Y_valid, prediction_grid_model)*100, 2)}%\n")
-    # print("Classification report:")
-    # print(classification_report(Y_valid, prediction_grid_model))
+    time.sleep(1)
+    window.update_idletasks()
     
     # Fictional passenger prediction (Class, Genrer, Age, SiblingsSpouses, FatherSons)
+    print("\nCalculating survival of the fictional passenger...")
+    time.sleep(1)
+    window.update_idletasks()
+
     surviving_prob = round(grid_model.predict_proba(passenger)[0][1] * 100, 2)
     
     # SHAP values for each variable of the passenger
@@ -64,7 +71,7 @@ def random_forest_predictor(passenger):
     total_survival_increased = round(increase_survival.sum(), 2)    
     
     description = textwrap.dedent(f'''
-    Your have a base survival probability of {base_survival.round(2)}%.
+    Your passenger have a base survival probability of {base_survival.round(2)}%.
     
     Each variable increases or decreases the survival probability of the passenger:
     - "Class" changes the survival probability by {increase_survival[0]}%.
@@ -81,7 +88,11 @@ def random_forest_predictor(passenger):
         "result": f"\nYour passenger has a {surviving_prob}% probability of surviving!",
         "description": description
     }
-        
+    
+    print("\nPrediction completed!")
+    time.sleep(2)
+    window.update_idletasks()
+
     return result
 
 # Prediction of a fictional passenger

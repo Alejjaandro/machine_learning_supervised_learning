@@ -1,11 +1,15 @@
 import os
+import sys
 import pandas as pd
 import tkinter as tk
 from tkinter import messagebox
+from tkinter.font import Font as tkFont
+from tkinter.scrolledtext import ScrolledText
 
 from Models.tree_classifier_model import tree_predictor
 from Models.random_forest_model import random_forest_predictor
 from Models.gradient_boosting_model import gradient_boosting_predictor
+from console_function import RedirectText
 
 os.system('cls')
 
@@ -24,9 +28,6 @@ def print_answer(passenger_class, sex, age, sibsp, parch, output):
         print("="*100)   
         print(output["description"])
         print("="*100)
-            
-    
-
 
 def titanic_predictor():
     end = False
@@ -69,16 +70,16 @@ def titanic_predictor():
             end = True
             return
         
-def predict_survival():
+def predict_survival(window):
     try:
-        # Obtener los datos ingresados por el usuario
+        # Obtain the values from the input fields
         pclass = int(class_var.get())
         sex = int(sex_var.get())
         age = int(age_var.get())
         sibsp = int(sibsp_var.get())
         parch = int(parch_var.get())
         
-        # Crear un DataFrame para el pasajero
+        # Create a DataFrame with the values
         passenger = pd.DataFrame({
             "Class": [pclass],
             "Sex": [sex],
@@ -87,40 +88,69 @@ def predict_survival():
             "ParCh": [parch]
         })
         
-        # Realizar la predicción
-        output = random_forest_predictor(passenger)
-        messagebox.showinfo("\nPredicción", f"Resultado: {output['result']}\n\nDescripción: {output['description']}")
+        # Make the prediction
+        output = random_forest_predictor(passenger, window)
+        messagebox.showinfo("\nPrediction", f"Result: {output['result']}\n\nDescription: {output['description']}")
          
     except Exception as e:
-        messagebox.showerror("Error", f"Ha ocurrido un error: {e}")
+        messagebox.showerror("Error", f"There has been an error: {e}")
 
-# Crear la ventana principal de la interfaz
+# Create the window and set its properties
 window = tk.Tk()
-window.title("Predicción de Supervivencia del Titanic")
+window.minsize(500, 400)
+window.maxsize(700, 500)
+window.title("Titanic Survival Predictor")
+window.config(padx=10, pady=10)
 
-# Etiquetas y campos de entrada
-tk.Label(window, text="Clase (1, 2, 3)").grid(row=0, column=0)
+# Font
+default_font = tkFont(family="Helvetica", size=12)
+
+# Función para actualizar el tamaño de la fuente al redimensionar la ventana
+def resize_fonts(event):
+    # Cambiar el tamaño de la fuente proporcionalmente al tamaño de la ventana
+    new_size = max(12, int(event.width / 50))
+    default_font.configure(size=new_size)
+
+# Vincular el redimensionamiento de la ventana al evento para ajustar el tamaño de las fuentes
+window.bind("<Configure>", resize_fonts)
+
+# Labels and input fields
+tk.Label(window, text="Class (1, 2, 3)", font=default_font).grid(row=0, column=0)
 class_var = tk.StringVar()
-tk.Entry(window, textvariable=class_var).grid(row=0, column=1)
+tk.Entry(window, textvariable=class_var, font=default_font).grid(row=0, column=1)
 
-tk.Label(window, text="Sexo (0=M, 1=F)").grid(row=1, column=0)
+tk.Label(window, text="Sex (0=M, 1=F)", font=default_font).grid(row=1, column=0)
 sex_var = tk.StringVar()
-tk.Entry(window, textvariable=sex_var).grid(row=1, column=1)
+tk.Entry(window, textvariable=sex_var, font=default_font).grid(row=1, column=1)
 
-tk.Label(window, text="Edad").grid(row=2, column=0)
+tk.Label(window, text="Age", font=default_font).grid(row=2, column=0)
 age_var = tk.StringVar()
-tk.Entry(window, textvariable=age_var).grid(row=2, column=1)
+tk.Entry(window, textvariable=age_var, font=default_font).grid(row=2, column=1)
 
-tk.Label(window, text="SibSp (Hermanos/Esposos)").grid(row=3, column=0)
+tk.Label(window, text="SibSp (Siblings/Spouses)", font=default_font).grid(row=3, column=0)
 sibsp_var = tk.StringVar()
-tk.Entry(window, textvariable=sibsp_var).grid(row=3, column=1)
+tk.Entry(window, textvariable=sibsp_var, font=default_font).grid(row=3, column=1)
 
-tk.Label(window, text="Parch (Padres/Hijos)").grid(row=4, column=0)
+tk.Label(window, text="ParCh (Parents/Childrens)", font=default_font).grid(row=4, column=0)
 parch_var = tk.StringVar()
-tk.Entry(window, textvariable=parch_var).grid(row=4, column=1)
+tk.Entry(window, textvariable=parch_var, font=default_font).grid(row=4, column=1)
 
-# Botón para predecir
-tk.Button(window, text="Predecir", command=predict_survival).grid(row=5, column=1)
+# Button to predict
+tk.Button(window, text="Predict", command=lambda: predict_survival(window), font=default_font).grid(row=5, column=1, sticky="nsew")
 
-# Iniciar la ventana
+# Área de mensajes (con Scroll)
+console_area = ScrolledText(window, height=10, state='normal', wrap='word', font=default_font, bg="black", fg="white")
+console_area.grid(row=6, column=0, columnspan=2, sticky="nsew", padx=10, pady=10)
+
+# Redirigir stdout a la consola de Tkinter
+sys.stdout = RedirectText(console_area)
+
+# Settings so the window is resized correctly
+for i in range(6):
+    window.grid_rowconfigure(i, weight=1)
+
+window.grid_columnconfigure(0, weight=1)
+window.grid_columnconfigure(1, weight=1)
+
+# Start the window
 window.mainloop()

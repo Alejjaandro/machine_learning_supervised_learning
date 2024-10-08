@@ -9,8 +9,9 @@ import numpy as np
 from pathlib import Path
 import textwrap
 import math
+import time
 
-def gradient_boosting_predictor(passenger):
+def gradient_boosting_predictor(passenger, window):
     df = pd.read_csv(Path(__file__).parent / "DataSet_Titanic.csv")
     
     # Divide data into X and Y. X is the data we will use to predict Y
@@ -39,17 +40,22 @@ def gradient_boosting_predictor(passenger):
     grid_search = GridSearchCV(estimator=base_model, param_grid=parameters, cv=5, scoring='accuracy')
     
     print("\nTraining GridSearchCV...")
+    window.update_idletasks()
+
     grid_search.fit(X_train_scaled, Y_train)
     grid_model = grid_search.best_estimator_
     
     prediction_grid_model = grid_model.predict(X_valid_scaled)
     grid_accuracy = accuracy_score(Y_valid, prediction_grid_model)
     print(f"Accuracy of the GridSearch model on validation set: {round(grid_accuracy * 100, 2)}%\n")
-    # print("Classification report:")
-    # print(classification_report(Y_valid, prediction_grid_model))
-
+    time.sleep(1)
+    window.update_idletasks()
 
     # Predicting the survival probability of the passenger
+    print("\nCalculating survival of the fictional passenger...")
+    time.sleep(1)
+    window.update_idletasks()
+
     passenger_scaled = pd.DataFrame(scaler.transform(passenger), columns=passenger.columns)
     surviving_prob = grid_model.predict_proba(passenger_scaled)[0][1]
 
@@ -76,7 +82,7 @@ def gradient_boosting_predictor(passenger):
     final_probability = 1 / (1 + math.exp(-log_odds))
 
     description = textwrap.dedent(f'''
-    Your have a base survival probability of {base_probability * 100:.2f}%.
+    Your passenger have a base survival probability of {base_probability * 100:.2f}%.
     
     Each variable increases or decreases the survival probability of the passenger:
     - "Class" changes the survival probability by {impact_probabilities[0]}%.
@@ -94,6 +100,10 @@ def gradient_boosting_predictor(passenger):
         "description": description
     }
     
+    print("\nPrediction completed!")
+    time.sleep(2)
+    window.update_idletasks()
+
     return result
 
 passenger = pd.DataFrame({
