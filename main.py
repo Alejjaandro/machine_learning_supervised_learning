@@ -12,10 +12,10 @@ from Models.gradient_boosting_model import gradient_boosting_predictor
 from console_function import RedirectText
 from tutorial_window import show_tutorial
 
-os.system('cls')
 
 def predict_survival(window):    
     try:
+        os.system('cls')
         # Check if a model has been selected
         model = selected_model.get()
         if model == "None":
@@ -32,11 +32,11 @@ def predict_survival(window):
         
         # Create a DataFrame with the values
         passenger = pd.DataFrame({
-            "Class": [pclass],
+            "Pclass": [pclass],
             "Sex": [sex],
             "Age": [age],
             "SibSp": [sibsp],
-            "ParCh": [parch]
+            "Parch": [parch]
         })
         
         # Make the prediction
@@ -67,11 +67,11 @@ input_frame = tk.Frame(window)
 input_frame.pack(pady=10, padx=10, fill='x')
 
 # Labels and input fields
-tk.Label(input_frame, text="Class (1, 2, 3):", font=default_font).grid(row=0, column=0, sticky='w', pady=5)
+tk.Label(input_frame, text="Passenger Class (1, 2, 3):", font=default_font).grid(row=0, column=0, sticky='w', pady=5)
 class_var = tk.Entry(input_frame, font=default_font)
 class_var.grid(row=0, column=1)
 
-tk.Label(input_frame, text="Sex (0=M, 1=F):", font=default_font).grid(row=1, column=0, sticky='w', pady=5)
+tk.Label(input_frame, text="Sex (0=F, 1=M):", font=default_font).grid(row=1, column=0, sticky='w', pady=5)
 sex_var = tk.Entry(input_frame, font=default_font)
 sex_var.grid(row=1, column=1)
 
@@ -83,7 +83,7 @@ tk.Label(input_frame, text="SibSp (Siblings/Spouses):", font=default_font).grid(
 sibsp_var = tk.Entry(input_frame, font=default_font)
 sibsp_var.grid(row=3, column=1)
 
-tk.Label(input_frame, text="ParCh (Parents/Childrens):", font=default_font).grid(row=4, column=0, sticky='w', pady=5)
+tk.Label(input_frame, text="Parch (Parents/Childrens):", font=default_font).grid(row=4, column=0, sticky='w', pady=5)
 parch_var = tk.Entry(input_frame, font=default_font)
 parch_var.grid(row=4, column=1)
 

@@ -12,7 +12,15 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 
 def random_forest_predictor(passenger, window):
-    df = pd.read_csv(Path(__file__).parent / "DataSet_Titanic.csv")
+    df = pd.read_csv(Path(__file__).parent / "TitanicDataset.csv")
+    df = df.drop(["PassengerId", "Name", "Ticket", "Fare", "Cabin", "Embarked"], axis=1)
+    df["Sex"] = df["Sex"].apply(lambda x: 1 if x == "male" else 0)
+
+    # Check for missing values.
+    nan_count_per_column = df.isnull().sum()
+    
+    # Fill missing values in the "Age" column with the median of the group.    
+    df['Age'] = df.groupby(['Pclass', 'Sex'])['Age'].transform(lambda x: x.fillna(x.median()))
 
     # Divide data into X and Y. X is the data we will use to predict Y
     X = df.drop("Survived", axis=1)
@@ -97,11 +105,11 @@ def random_forest_predictor(passenger, window):
 
 # Prediction of a fictional passenger
 fictional_passenger = pd.DataFrame({
-    "Class": [2],
+    "Pclass": [2],
     "Sex": [0],
     "Age": [26],
     "SibSp": [0],
-    "ParCh": [0]
+    "Parch": [0]
 })
 
 # output = random_forest_predictor(fictional_passenger)

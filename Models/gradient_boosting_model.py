@@ -12,31 +12,40 @@ import math
 import time
 
 def gradient_boosting_predictor(passenger, window):
-    df = pd.read_csv(Path(__file__).parent / "DataSet_Titanic.csv")
     
-    # Divide data into X and Y. X is the data we will use to predict Y
+    df = pd.read_csv(Path(__file__).parent / "TitanicDataset.csv")
+    df = df.drop(["PassengerId", "Name", "Ticket", "Fare", "Cabin", "Embarked"], axis=1)
+    df["Sex"] = df["Sex"].apply(lambda x: 1 if x == "male" else 0)
+    
+    # Check for missing values.
+    nan_count_per_column = df.isnull().sum()
+    
+    # Fill missing values in the "Age" column with the median of the group.    
+    df['Age'] = df.groupby(['Pclass', 'Sex'])['Age'].transform(lambda x: x.fillna(x.median()))
+    
+    # Divide data into X and Y. X is the data we will use to predict Y.
     X = df.drop("Survived", axis=1)
     Y = df["Survived"]
 
-    # Divide data into validation and training data
+    # Divide data into validation and training data.
     X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size=0.2, random_state=89)
 
-    # Scaling the data
+    # Scaling the data.
     scaler = StandardScaler()
     X_train_scaled = pd.DataFrame(scaler.fit_transform(X_train), columns=X_train.columns)
     X_valid_scaled = pd.DataFrame(scaler.transform(X_valid), columns=X_valid.columns)
     
-    # Initialize the model
+    # Initialize the model.
     base_model = GradientBoostingClassifier(random_state=89)
 
-    # Define the hyperparameters to tune
+    # Define the hyperparameters to tune.
     parameters = {
         "n_estimators": [50, 100, 150],
         "learning_rate": [0.01, 0.1, 0.2],
         "max_depth": [1, 2, 3, 4, 5, None],
     }
     
-    # Create the GridSearchCV object
+    # Create the GridSearchCV object.
     grid_search = GridSearchCV(estimator=base_model, param_grid=parameters, cv=5, scoring='accuracy')
     
     print("\nTraining GridSearchCV...")
@@ -51,7 +60,7 @@ def gradient_boosting_predictor(passenger, window):
     time.sleep(1)
     window.update_idletasks()
 
-    # Predicting the survival probability of the passenger
+    # Predicting the survival probability of the passenger.
     print("\nCalculating survival of the fictional passenger...")
     time.sleep(1)
     window.update_idletasks()
@@ -107,11 +116,11 @@ def gradient_boosting_predictor(passenger, window):
     return result
 
 passenger = pd.DataFrame({
-    "Class": [3],
+    "Pclass": [3],
     "Sex": [1],
     "Age": [26],
     "SibSp": [0],
-    "ParCh": [0]
+    "Parch": [0]
 })
 
 # output = gradient_boosting_predictor(passenger)

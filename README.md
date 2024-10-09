@@ -2,7 +2,7 @@
 
 This project is a Python-based application that predicts the survival of a fictional passenger aboard the Titanic based on user-provided characteristics.  
 
-The application features a graphical user interface (GUI) built using [Tkinter](https://docs.python.org/es/3/library/tkinter.html#module-tkinter), and the prediction is powered by **3 machine learnings models** from [scikit-learn](https://scikit-learn.org/stable/) trained using the Titanic dataset.
+The application features a graphical user interface (GUI) built using [Tkinter](https://docs.python.org/es/3/library/tkinter.html#module-tkinter), and the prediction is powered by **3 machine learnings models** from [scikit-learn](https://scikit-learn.org/stable/) trained using this [Titanic dataset](https://www.kaggle.com/datasets/yasserh/titanic-dataset) from [Kaggle](https://www.kaggle.com/organizations/kaggle).
 
 ## Features
 
