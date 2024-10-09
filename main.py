@@ -10,68 +10,19 @@ from Models.tree_classifier_model import tree_predictor
 from Models.random_forest_model import random_forest_predictor
 from Models.gradient_boosting_model import gradient_boosting_predictor
 from console_function import RedirectText
+from tutorial_window import show_tutorial
 
 os.system('cls')
 
-def print_answer(passenger_class, sex, age, sibsp, parch, output):
-    
-    print("="*100)
-    print(f"YOUR PASSENGER: Class: {passenger_class}, Sex: {sex}, Age: {age}, SibSp: {sibsp}, ParCh: {parch}")
-    
-    print(output["result"])
-    print("="*100)
-    
-    print("Do you want to know more about the prediction?")
-    print("1. Yes\n2. No")
-    
-    if int(input()) == 1:
-        print("="*100)   
-        print(output["description"])
-        print("="*100)
-
-def titanic_predictor():
-    end = False
-    
-    print("*"*100)
-    print("TITANIC SURVIVOR PREDICTOR")    
-    while not end:
-        print("Would you like to predict if you will survive the sinking of the Titanic?\n1. Yes\n2. No")
-        
-        if int(input()) == 1:
-            print("\nAnswer the following questions to predict if you will survive the sinking of the Titanic.")
-            print("Choose your passenger class:\n1. First Class\n2. Second Class\n3. Third Class")
-            passenger_class = int(input())
-            print("Choose your gender:\n0. Male\n1. Female")
-            sex = int(input())
-            print("Your age")
-            age = int(input())
-            print("Choose your siblings and spouses on board")
-            sibsp = int(input())
-            print("Choose your parents and children on board")
-            parch = int(input())
-            
-            passenger =pd.DataFrame({
-                "Class": [passenger_class],
-                "Sex": [sex],
-                "Age": [age],
-                "SibSp": [sibsp],
-                "ParCh": [parch]
-            })
-            
-            output = random_forest_predictor(passenger)
-            print_answer(passenger_class, sex, age, sibsp, parch, output)
-                            
-            print("*"*100)
-            
-            print("\nPress any key to continue...")
-            input()
-        else:
-            print("Ok, see you next time!")
-            end = True
-            return
-        
-def predict_survival(window):
+def predict_survival(window):    
     try:
+        # Check if a model has been selected
+        model = selected_model.get()
+        if model == "None":
+            messagebox.showwarning("Model Selection", "Please select a machine learning model.")
+        else:
+            print(f"Predicting using {model} model")
+              
         # Obtain the values from the input fields
         pclass = int(class_var.get())
         sex = int(sex_var.get())
@@ -89,7 +40,13 @@ def predict_survival(window):
         })
         
         # Make the prediction
-        output = random_forest_predictor(passenger, window)
+        if model == "Decision Tree":
+            output = tree_predictor(passenger, window)
+        elif model == "Random Forest":
+            output = random_forest_predictor(passenger, window)
+        elif model == "Gradient Boosting":
+            output = gradient_boosting_predictor(passenger, window)
+            
         messagebox.showinfo("\nPrediction", f"Result: {output['result']}\n\nDescription: {output['description']}")
          
     except Exception as e:
@@ -97,60 +54,66 @@ def predict_survival(window):
 
 # Create the window and set its properties
 window = tk.Tk()
-window.minsize(500, 400)
-window.maxsize(700, 500)
+window.minsize(500, 700)
+window.maxsize(900, 900)
 window.title("Titanic Survival Predictor")
 window.config(padx=10, pady=10)
 
 # Font
-default_font = tkFont(family="Helvetica", size=12)
+default_font = tkFont(family="Helvetica", size=14)
 
-# Función para actualizar el tamaño de la fuente al redimensionar la ventana
-def resize_fonts(event):
-    # Cambiar el tamaño de la fuente proporcionalmente al tamaño de la ventana
-    new_size = max(12, int(event.width / 50))
-    default_font.configure(size=new_size)
-
-# Vincular el redimensionamiento de la ventana al evento para ajustar el tamaño de las fuentes
-window.bind("<Configure>", resize_fonts)
+# Create a frame for the input fields
+input_frame = tk.Frame(window)
+input_frame.pack(pady=10, padx=10, fill='x')
 
 # Labels and input fields
-tk.Label(window, text="Class (1, 2, 3)", font=default_font).grid(row=0, column=0)
-class_var = tk.StringVar()
-tk.Entry(window, textvariable=class_var, font=default_font).grid(row=0, column=1)
+tk.Label(input_frame, text="Class (1, 2, 3):", font=default_font).grid(row=0, column=0, sticky='w', pady=5)
+class_var = tk.Entry(input_frame, font=default_font)
+class_var.grid(row=0, column=1)
 
-tk.Label(window, text="Sex (0=M, 1=F)", font=default_font).grid(row=1, column=0)
-sex_var = tk.StringVar()
-tk.Entry(window, textvariable=sex_var, font=default_font).grid(row=1, column=1)
+tk.Label(input_frame, text="Sex (0=M, 1=F):", font=default_font).grid(row=1, column=0, sticky='w', pady=5)
+sex_var = tk.Entry(input_frame, font=default_font)
+sex_var.grid(row=1, column=1)
 
-tk.Label(window, text="Age", font=default_font).grid(row=2, column=0)
-age_var = tk.StringVar()
-tk.Entry(window, textvariable=age_var, font=default_font).grid(row=2, column=1)
+tk.Label(input_frame, text="Age:", font=default_font).grid(row=2, column=0, sticky='w', pady=5)
+age_var = tk.Entry(input_frame, font=default_font)
+age_var.grid(row=2, column=1)
 
-tk.Label(window, text="SibSp (Siblings/Spouses)", font=default_font).grid(row=3, column=0)
-sibsp_var = tk.StringVar()
-tk.Entry(window, textvariable=sibsp_var, font=default_font).grid(row=3, column=1)
+tk.Label(input_frame, text="SibSp (Siblings/Spouses):", font=default_font).grid(row=3, column=0, sticky='w', pady=5)
+sibsp_var = tk.Entry(input_frame, font=default_font)
+sibsp_var.grid(row=3, column=1)
 
-tk.Label(window, text="ParCh (Parents/Childrens)", font=default_font).grid(row=4, column=0)
-parch_var = tk.StringVar()
-tk.Entry(window, textvariable=parch_var, font=default_font).grid(row=4, column=1)
+tk.Label(input_frame, text="ParCh (Parents/Childrens):", font=default_font).grid(row=4, column=0, sticky='w', pady=5)
+parch_var = tk.Entry(input_frame, font=default_font)
+parch_var.grid(row=4, column=1)
+
+# Create a frame for the model selection
+model_frame = tk.Frame(window)
+model_frame.pack(pady=10, padx=10, fill='x')
+
+# Variable to store the selected model
+selected_model = tk.StringVar(value="None")
+
+# Radio buttons to select the model
+tk.Label(model_frame, text="Select a Machine Learning Model:", font=default_font).pack(anchor='w')
+tk.Radiobutton(model_frame, text="Decision Tree", variable=selected_model, value="Decision Tree", font=default_font).pack(anchor='w')
+tk.Radiobutton(model_frame, text="Random Forest", variable=selected_model, value="Random Forest", font=default_font).pack(anchor='w')
+tk.Radiobutton(model_frame, text="Gradient Boosting", variable=selected_model, value="Gradient Boosting", font=default_font).pack(anchor='w')
 
 # Button to predict
-tk.Button(window, text="Predict", command=lambda: predict_survival(window), font=default_font).grid(row=5, column=1, sticky="nsew")
+predict_button = tk.Button(window, text="Predict", command=lambda: predict_survival(window), font=default_font)
+predict_button.pack(pady=10)
 
-# Área de mensajes (con Scroll)
-console_area = ScrolledText(window, height=10, state='normal', wrap='word', font=default_font, bg="black", fg="white")
-console_area.grid(row=6, column=0, columnspan=2, sticky="nsew", padx=10, pady=10)
+# Console area to show the output
+console_frame = tk.Frame(window, bg="black")
+console_frame.pack(pady=10, padx=10, fill='both', expand=True)
 
-# Redirigir stdout a la consola de Tkinter
+console_area = ScrolledText(console_frame, height=10, state='normal', wrap='word', font=12, bg="black", fg="white")
+console_area.pack(fill='both', expand=True)
+
+# Redirect the console output to the console area
 sys.stdout = RedirectText(console_area)
 
-# Settings so the window is resized correctly
-for i in range(6):
-    window.grid_rowconfigure(i, weight=1)
-
-window.grid_columnconfigure(0, weight=1)
-window.grid_columnconfigure(1, weight=1)
-
 # Start the window
+show_tutorial()
 window.mainloop()

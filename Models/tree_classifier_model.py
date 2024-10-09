@@ -47,7 +47,7 @@ def tree_predictor(passenger, window):
     prediction_grid_model = grid_model.predict(X_valid)
 
     # Calculate the accuracy of the model
-    print(f"Accuracy of the GridSearch model: {round(accuracy_score(Y_valid, prediction_grid_model)*100, 2)}%\n")
+    print(f"Accuracy of the GridSearch model on validation set: {round(accuracy_score(Y_valid, prediction_grid_model)*100, 2)}%")
     time.sleep(1)
     window.update_idletasks()
                     

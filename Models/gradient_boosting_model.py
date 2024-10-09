@@ -47,7 +47,7 @@ def gradient_boosting_predictor(passenger, window):
     
     prediction_grid_model = grid_model.predict(X_valid_scaled)
     grid_accuracy = accuracy_score(Y_valid, prediction_grid_model)
-    print(f"Accuracy of the GridSearch model on validation set: {round(grid_accuracy * 100, 2)}%\n")
+    print(f"Accuracy of the GridSearch model on validation set: {round(grid_accuracy * 100, 2)}%")
     time.sleep(1)
     window.update_idletasks()
 
