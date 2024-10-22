@@ -1,4 +1,3 @@
-import os
 import sys
 import pandas as pd
 import tkinter as tk
@@ -15,7 +14,6 @@ from tutorial_window import show_tutorial
 
 def predict_survival(window):    
     try:
-        os.system('cls')
         # Check if a model has been selected
         model = selected_model.get()
         if model == "None":

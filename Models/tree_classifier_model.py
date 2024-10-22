@@ -20,6 +20,12 @@ def tree_predictor(passenger, window):
     # Parsing "male" and "female" to 1 and 0
     df["Sex"] = df["Sex"].apply(lambda x: 1 if x == "male" else 0)
 
+    
+    # first_class_survival_rate = df[(df["Pclass"] == 1) & (df["Survived"] == 1)].shape[0] / df[df["Pclass"] == 1].shape[0]
+    # second_class_survival_rate = df[(df["Pclass"] == 2) & (df["Survived"] == 1)].shape[0] / df[df["Pclass"] == 2].shape[0]
+    # third_class_survival_rate = df[(df["Pclass"] == 3) & (df["Survived"] == 1)].shape[0] / df[df["Pclass"] == 3].shape[0]
+    # print(first_class_survival_rate, second_class_survival_rate, third_class_survival_rate)
+    
     # Check for missing values.
     nan_count_per_column = df.isnull().sum()
     
@@ -31,10 +37,10 @@ def tree_predictor(passenger, window):
     Y = df["Survived"]
 
     # Divide data into validation and training data
-    X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size=0.2, random_state=89)
+    X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size=0.2, random_state=94)
     
     # Create base model
-    base_model = DecisionTreeClassifier(random_state=89)
+    base_model = DecisionTreeClassifier(random_state=94)
 
     # Define parameters for GridSearchCV 
     parameters = {
@@ -110,13 +116,13 @@ def tree_predictor(passenger, window):
 
 # Test the model with a fictional passenger
 passenger = pd.DataFrame({
-    "Pclass": [3],
+    "Pclass": [2],
     "Sex": [1],
-    "Age": [26],
+    "Age": [28],
     "SibSp": [0],
     "Parch": [0]
 })
 
-# output = tree_predictor(passenger)
+# output = tree_predictor(passenger, None)
 # print(output["result"])
 # print(output["description"])
